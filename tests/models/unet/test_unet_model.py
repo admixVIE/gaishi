@@ -821,12 +821,12 @@ def test_train_uses_dataloader_worker_perf_defaults_when_none(tmp_path, monkeypa
     assert "prefetch_factor" not in captured
 
 
-def test_train_logs_recent500_metrics_every_1000_batches(tmp_path, monkeypatch):
+def test_train_logs_recent_500_metrics_every_1000_batches(tmp_path, monkeypatch):
     monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
     monkeypatch.setattr(unet_mod, "UNetPlusPlusRNN", DummyUNetPlusPlusRNN)
 
     training_data = _make_training_h5(tmp_path, n_reps=20, N=2, L=7, with_gaps=True)
-    model_dir = tmp_path / "model_out_recent500"
+    model_dir = tmp_path / "model_out_recent_500"
     model_path = model_dir / "best.safetensors"
 
     xb = torch.zeros((1, 2, 2, 7), dtype=torch.float32)
@@ -852,8 +852,8 @@ def test_train_logs_recent500_metrics_every_1000_batches(tmp_path, monkeypatch):
     )
 
     training_log_text = (model_dir / "training.log").read_text()
-    assert "recent500_loss =" in training_log_text
-    assert "recent500_accuracy =" in training_log_text
+    assert "recent_500_loss =" in training_log_text
+    assert "recent_500_accuracy =" in training_log_text
 
 
 def test_train_logs_recent_window_metrics_with_custom_window(tmp_path, monkeypatch):
@@ -890,8 +890,8 @@ def test_train_logs_recent_window_metrics_with_custom_window(tmp_path, monkeypat
     )
 
     training_log_text = (model_dir / "training.log").read_text()
-    assert "recent123_loss =" in training_log_text
-    assert "recent123_accuracy =" in training_log_text
+    assert "recent_123_loss =" in training_log_text
+    assert "recent_123_accuracy =" in training_log_text
 
 
 def test_train_raises_for_recent_window_greater_than_1000(tmp_path, monkeypatch):

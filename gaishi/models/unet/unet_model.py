@@ -335,8 +335,8 @@ class UNetModel(MlModel):
                     training_log_file.write(
                         f"Epoch {epoch_idx}, batch {batch_idx}: "
                         f"loss = {mean_loss}, accuracy = {mean_acc}, "
-                        f"recent{recent_window}_loss = {recent_loss}, "
-                        f"recent{recent_window}_accuracy = {recent_acc}.\n"
+                        f"recent_{recent_window}_loss = {recent_loss}, "
+                        f"recent_{recent_window}_accuracy = {recent_acc}.\n"
                     )
                     training_log_file.flush()
 
