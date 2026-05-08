@@ -18,6 +18,7 @@
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
 import h5py, os
+from collections import deque
 from typing import Optional
 
 import numpy as np
@@ -32,6 +33,7 @@ from gaishi.models.unet.layers import UNetPlusPlus, UNetPlusPlusRNN
 from gaishi.registries.model_registry import MODEL_REGISTRY
 
 from gaishi.models.unet.dataloader_h5 import build_dataloaders_from_h5
+
 
 
 @MODEL_REGISTRY.register("unet++")
@@ -70,6 +72,7 @@ class UNetModel(MlModel):
         persistent_workers: Optional[bool] = None,
         prefetch_factor: Optional[int] = None,
         use_amp: bool = False,
+        recent_window: int = 500,
         **kwargs,
     ) -> None:
         """
@@ -177,6 +180,9 @@ class UNetModel(MlModel):
             Enable CUDA AMP training/inference execution path. When True and CUDA is
             used, forward/loss runs under autocast and backpropagation uses
             `GradScaler`. Default: False.
+        recent_window : int, optional
+            Sliding window size for recent batch loss/accuracy metrics logged every
+            1000 batches. Must be in the range [1, 1000]. Default: 500.
 
         Raises
         ------
@@ -217,6 +223,12 @@ class UNetModel(MlModel):
 
         if not isinstance(num_workers, int) or num_workers < 0:
             raise ValueError("`num_workers` must be a non-negative integer.")
+        if (
+            not isinstance(recent_window, int)
+            or recent_window <= 0
+            or recent_window > 1000
+        ):
+            raise ValueError("`recent_window` must be an integer in [1, 1000].")
 
         input_channels = 4 if add_rnn else 2
 
@@ -286,6 +298,8 @@ class UNetModel(MlModel):
             net.train()
             losses = []
             accuracies = []
+            recent_losses = deque(maxlen=int(recent_window))
+            recent_accuracies = deque(maxlen=int(recent_window))
 
             for batch_idx, (x, y) in enumerate(train_loader, start=1):
                 optimizer.zero_grad()
@@ -305,16 +319,24 @@ class UNetModel(MlModel):
                     loss.backward()
                     optimizer.step()
 
-                losses.append(loss.item())
+                batch_loss = loss.item()
+                batch_acc = _binary_batch_accuracy_from_logits(y_pred, y)
 
-                accuracies.append(_binary_batch_accuracy_from_logits(y_pred, y))
-
-                mean_loss = np.mean(losses)
-                mean_acc = np.mean(accuracies)
+                losses.append(batch_loss)
+                accuracies.append(batch_acc)
+                recent_losses.append(batch_loss)
+                recent_accuracies.append(batch_acc)
 
                 if batch_idx % 1000 == 0:
+                    mean_loss = np.mean(losses)
+                    mean_acc = np.mean(accuracies)
+                    recent_loss = np.mean(recent_losses)
+                    recent_acc = np.mean(recent_accuracies)
                     training_log_file.write(
-                        f"Epoch {epoch_idx}, batch {batch_idx}: loss = {mean_loss}, accuracy = {mean_acc}.\n"
+                        f"Epoch {epoch_idx}, batch {batch_idx}: "
+                        f"loss = {mean_loss}, accuracy = {mean_acc}, "
+                        f"recent{recent_window}_loss = {recent_loss}, "
+                        f"recent{recent_window}_accuracy = {recent_acc}.\n"
                     )
                     training_log_file.flush()
 

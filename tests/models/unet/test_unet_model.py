@@ -819,3 +819,98 @@ def test_train_uses_dataloader_worker_perf_defaults_when_none(tmp_path, monkeypa
 
     assert "persistent_workers" not in captured
     assert "prefetch_factor" not in captured
+
+
+def test_train_logs_recent500_metrics_every_1000_batches(tmp_path, monkeypatch):
+    monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
+    monkeypatch.setattr(unet_mod, "UNetPlusPlusRNN", DummyUNetPlusPlusRNN)
+
+    training_data = _make_training_h5(tmp_path, n_reps=20, N=2, L=7, with_gaps=True)
+    model_dir = tmp_path / "model_out_recent500"
+    model_path = model_dir / "best.safetensors"
+
+    xb = torch.zeros((1, 2, 2, 7), dtype=torch.float32)
+    yb = torch.zeros((1, 1, 2, 7), dtype=torch.float32)
+    train_loader = [(xb, yb)] * 1000
+    val_loader = [(xb, yb)]
+
+    def _fake_build_dataloaders_from_h5(**_kwargs):
+        return train_loader, val_loader, np.array([0]), np.array([1])
+
+    monkeypatch.setattr(unet_mod, "build_dataloaders_from_h5", _fake_build_dataloaders_from_h5)
+
+    unet_mod.UNetModel.train(
+        data=training_data,
+        output=str(model_path),
+        add_rnn=False,
+        batch_size=1,
+        n_epochs=1,
+        n_early=0,
+        min_delta=0.0,
+        val_prop=0.2,
+        seed=0,
+    )
+
+    training_log_text = (model_dir / "training.log").read_text()
+    assert "recent500_loss =" in training_log_text
+    assert "recent500_accuracy =" in training_log_text
+
+
+def test_train_logs_recent_window_metrics_with_custom_window(tmp_path, monkeypatch):
+    monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
+    monkeypatch.setattr(unet_mod, "UNetPlusPlusRNN", DummyUNetPlusPlusRNN)
+
+    training_data = _make_training_h5(tmp_path, n_reps=20, N=2, L=7, with_gaps=True)
+    model_dir = tmp_path / "model_out_recent_custom"
+    model_path = model_dir / "best.safetensors"
+
+    xb = torch.zeros((1, 2, 2, 7), dtype=torch.float32)
+    yb = torch.zeros((1, 1, 2, 7), dtype=torch.float32)
+    train_loader = [(xb, yb)] * 1000
+    val_loader = [(xb, yb)]
+
+    def _fake_build_dataloaders_from_h5(**_kwargs):
+        return train_loader, val_loader, np.array([0]), np.array([1])
+
+    monkeypatch.setattr(
+        unet_mod, "build_dataloaders_from_h5", _fake_build_dataloaders_from_h5
+    )
+
+    unet_mod.UNetModel.train(
+        data=training_data,
+        output=str(model_path),
+        add_rnn=False,
+        batch_size=1,
+        n_epochs=1,
+        n_early=0,
+        min_delta=0.0,
+        val_prop=0.2,
+        seed=0,
+        recent_window=123,
+    )
+
+    training_log_text = (model_dir / "training.log").read_text()
+    assert "recent123_loss =" in training_log_text
+    assert "recent123_accuracy =" in training_log_text
+
+
+def test_train_raises_for_recent_window_greater_than_1000(tmp_path, monkeypatch):
+    monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
+    monkeypatch.setattr(unet_mod, "UNetPlusPlusRNN", DummyUNetPlusPlusRNN)
+
+    training_data = _make_training_h5(tmp_path, n_reps=10, N=2, L=7, with_gaps=True)
+    model_path = tmp_path / "model_out_recent_window_limit" / "best.safetensors"
+
+    with pytest.raises(ValueError, match=r"`recent_window` must be an integer in \[1, 1000\]\."):
+        unet_mod.UNetModel.train(
+            data=training_data,
+            output=str(model_path),
+            add_rnn=False,
+            batch_size=2,
+            n_epochs=1,
+            n_early=0,
+            min_delta=0.0,
+            val_prop=0.2,
+            seed=0,
+            recent_window=1001,
+        )
