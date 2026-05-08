@@ -140,6 +140,18 @@ def test_h5dataset_invalid_channels_raises(h5_with_labels):
         _ = H5Dataset(h5_file=path, channels=3)
 
 
+def test_h5dataset_getitem_rejects_invalid_runtime_channels(h5_with_labels):
+    path, _ = h5_with_labels
+    ds = H5Dataset(h5_file=path, channels=2, require_labels=True)
+    ds.channels = 3
+
+    with pytest.raises(ValueError, match="channels must be 2 or 4"):
+        _ = ds[0]
+
+    if ds._h5 is not None:
+        ds._h5.close()
+
+
 def test_h5dataset_missing_labels_behavior(h5_no_labels):
     path, _ = h5_no_labels
 
@@ -168,6 +180,49 @@ def test_make_h5_collate_fn_no_labels():
     assert xb.dtype == torch.float32
     assert xb.shape == (2, 4, 2, 3)
     assert yb is None
+
+
+def test_make_h5_collate_fn_preserves_float32_input():
+    x = np.zeros((4, 2, 3), dtype=np.float32)
+    y = np.ones((1, 2, 3), dtype=np.float32)
+    batch = [(x, y), (x, y)]
+
+    collate = make_h5_collate_fn(label_smooth=False)
+    xb, yb = collate(batch)
+
+    assert xb.dtype == torch.float32
+    assert yb is not None
+    assert yb.dtype == torch.float32
+    assert xb.shape == (2, 4, 2, 3)
+    assert yb.shape == (2, 1, 2, 3)
+
+
+def test_make_h5_collate_fn_casts_non_float32_inputs():
+    x = np.array(
+        [
+            [[0, 1, 2], [3, 4, 5]],
+            [[6, 7, 8], [9, 10, 11]],
+            [[12, 13, 14], [15, 16, 17]],
+            [[18, 19, 20], [21, 22, 23]],
+        ],
+        dtype=np.int16,
+    )
+    y = np.array([[[0.0, 1.0, 0.5], [1.0, 0.25, 0.75]]], dtype=np.float64)
+    batch = [(x, y), (x, y)]
+
+    collate = make_h5_collate_fn(label_smooth=False)
+    xb, yb = collate(batch)
+
+    assert xb.dtype == torch.float32
+    assert yb is not None
+    assert yb.dtype == torch.float32
+    assert xb.shape == (2, 4, 2, 3)
+    assert yb.shape == (2, 1, 2, 3)
+
+    expected_x = np.stack([x, x], axis=0).astype(np.float32)
+    expected_y = np.stack([y, y], axis=0).astype(np.float32)
+    assert torch.equal(xb, torch.from_numpy(expected_x))
+    assert torch.equal(yb, torch.from_numpy(expected_y))
 
 
 def test_make_h5_collate_fn_label_smoothing_exact():

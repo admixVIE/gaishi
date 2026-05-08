@@ -128,17 +128,18 @@ class H5Dataset(Dataset):
         h5 = self._get_h5()
         r = int(idx) if self.indices is None else int(self.indices[idx])
 
-        ref = np.asarray(h5["/data/Ref_genotype"][r])
-        tgt = np.asarray(h5["/data/Tgt_genotype"][r])
+        ref = np.asarray(h5["/data/Ref_genotype"][r], dtype=self.x_dtype)
+        tgt = np.asarray(h5["/data/Tgt_genotype"][r], dtype=self.x_dtype)
+        if self.channels not in (2, 4):
+            raise ValueError("channels must be 2 or 4")
 
-        if self.channels == 2:
-            x = np.stack([ref, tgt], axis=0)
-        else:
-            gp = np.asarray(h5["/data/Gap_to_prev"][r])
-            gn = np.asarray(h5["/data/Gap_to_next"][r])
-            x = np.stack([ref, tgt, gp, gn], axis=0)
+        x = np.empty((self.channels,) + ref.shape, dtype=self.x_dtype)
+        x[0] = ref
+        x[1] = tgt
 
-        x = x.astype(self.x_dtype, copy=False)
+        if self.channels == 4:
+            x[2] = np.asarray(h5["/data/Gap_to_prev"][r], dtype=self.x_dtype)
+            x[3] = np.asarray(h5["/data/Gap_to_next"][r], dtype=self.x_dtype)
 
         if "/targets/Label" in h5:
             y = np.asarray(h5["/targets/Label"][r])[None, :, :]  # (1,N,L)
@@ -212,13 +213,17 @@ def make_h5_collate_fn(
             if y is not None:
                 ys.append(y)
 
-        x_np = np.stack(xs, axis=0).astype(np.float32, copy=False)  # (B,C,N,L)
+        x_np = np.stack(xs, axis=0)  # (B,C,N,L)
+        if x_np.dtype != np.float32:
+            x_np = x_np.astype(np.float32, copy=False)
         x_out = torch.from_numpy(x_np)
 
         if len(ys) == 0:
             return x_out, None
 
-        y_np = np.stack(ys, axis=0).astype(np.float32, copy=False)  # (B,1,N,L)
+        y_np = np.stack(ys, axis=0)  # (B,1,N,L)
+        if y_np.dtype != np.float32:
+            y_np = y_np.astype(np.float32, copy=False)
 
         if label_smooth:
             e = rng.uniform(0.0, float(label_noise), size=y_np.shape).astype(
