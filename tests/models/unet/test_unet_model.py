@@ -219,6 +219,37 @@ def test_train_branch_neighbor_gap_fusion_four_channel(tmp_path, monkeypatch):
     assert DummyUNetPlusPlusRNN.last_init["polymorphisms"] == 11
 
 
+def test_train_stops_when_early_stopping_is_triggered(tmp_path, monkeypatch):
+    class ConstantLoss(torch.nn.Module):
+        def forward(self, y_pred, y_true):
+            return y_pred.mean() * 0 + torch.tensor(
+                1.0, device=y_pred.device, dtype=y_pred.dtype
+            )
+
+    monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
+    monkeypatch.setattr(unet_mod, "BCEWithLogitsLoss", lambda **kwargs: ConstantLoss())
+
+    training_data = _make_training_h5(tmp_path, n_reps=40, N=2, L=7, with_gaps=True)
+    model_dir = tmp_path / "model_out_early_stop"
+    model_path = model_dir / "best.safetensors"
+
+    unet_mod.UNetModel.train(
+        data=training_data,
+        output=str(model_path),
+        add_rnn=False,
+        batch_size=2,
+        n_early=1,
+        n_epochs=5,
+        min_delta=0.0,
+        val_prop=0.2,
+        seed=0,
+    )
+
+    val_lines = (model_dir / "validation.log").read_text().strip().splitlines()
+    assert len(val_lines) == 2
+    assert "Early stopping; best weights at epoch 1 reloaded." in val_lines[-1]
+
+
 def test_train_raises_when_add_rnn_true_but_missing_gap_datasets(tmp_path, monkeypatch):
     monkeypatch.setattr(unet_mod, "UNetPlusPlus", DummyUNetPlusPlus)
     monkeypatch.setattr(unet_mod, "UNetPlusPlusRNN", DummyUNetPlusPlusRNN)

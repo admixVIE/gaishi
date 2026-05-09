@@ -293,6 +293,7 @@ class UNetModel(MlModel):
         min_val_loss = np.inf
         early_count = 0
         best_epoch = 0
+        is_early_stop = False
 
         for epoch_idx in range(1, int(n_epochs) + 1):
             net.train()
@@ -371,13 +372,17 @@ class UNetModel(MlModel):
                 early_count = 0
             else:
                 early_count += 1
-                if early_count >= int(n_early):
+                if int(n_early) > 0 and early_count >= int(n_early):
                     add_msg = (
                         f" Early stopping; best weights at epoch {best_epoch} reloaded."
                     )
                     net.load_state_dict(load_file(output, device="cpu"))
+                    is_early_stop = True
             validation_log_file.write(log_msg + add_msg + "\n")
             validation_log_file.flush()
+
+            if is_early_stop:
+                break
 
         training_log_file.flush()
         training_log_file.close()
