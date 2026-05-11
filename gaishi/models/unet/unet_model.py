@@ -35,7 +35,6 @@ from gaishi.registries.model_registry import MODEL_REGISTRY
 from gaishi.models.unet.dataloader_h5 import build_dataloaders_from_h5
 
 
-
 @MODEL_REGISTRY.register("unet++")
 class UNetModel(MlModel):
     """
@@ -73,7 +72,6 @@ class UNetModel(MlModel):
         prefetch_factor: Optional[int] = None,
         use_amp: bool = False,
         recent_window: int = 500,
-        **kwargs,
     ) -> None:
         """
         Train a UNet model on an HDF5 dataset and save the best weights.
@@ -398,7 +396,6 @@ class UNetModel(MlModel):
         add_rnn: bool = False,
         site_weighting: bool = False,
         device: str = None,
-        **kwargs,
     ) -> None:
         """
         Run inference on an HDF5 file and write an aggregated prediction table.

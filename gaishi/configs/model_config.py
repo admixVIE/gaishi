@@ -17,10 +17,106 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-from typing import Any, Literal
-from pydantic import BaseModel, Field
+import inspect
+from typing import Any, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt
+from pydantic import model_validator
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.linear_model import LogisticRegression
+
+
+class LrParams(BaseModel):
+    """
+    Parameter schema for logistic regression model configuration.
+    """
+
+    model_config = ConfigDict(extra="allow", strict=True)
+
+    is_scaled: StrictBool = False
+
+    @model_validator(mode="after")
+    def validate_known_keys(self) -> "LrParams":
+        """
+        Validate keys against LogisticRegression signature plus gaishi-specific keys.
+        """
+        allowed_keys = set(inspect.signature(LogisticRegression).parameters)
+        allowed_keys.add("is_scaled")
+        unknown_keys = set(self.model_extra or {}).difference(allowed_keys)
+        if unknown_keys:
+            unknown_str = ", ".join(sorted(unknown_keys))
+            raise ValueError(f"Unknown logistic_regression params: {unknown_str}")
+        return self
+
+
+class EtcParams(BaseModel):
+    """
+    Parameter schema for extra-trees classifier model configuration.
+    """
+
+    model_config = ConfigDict(extra="allow", strict=True)
+
+    is_scaled: StrictBool = False
+
+    @model_validator(mode="after")
+    def validate_known_keys(self) -> "EtcParams":
+        """
+        Validate keys against ExtraTreesClassifier signature plus gaishi-specific keys.
+        """
+        allowed_keys = set(inspect.signature(ExtraTreesClassifier).parameters)
+        allowed_keys.add("is_scaled")
+        unknown_keys = set(self.model_extra or {}).difference(allowed_keys)
+        if unknown_keys:
+            unknown_str = ", ".join(sorted(unknown_keys))
+            raise ValueError(f"Unknown extra_trees_classifier params: {unknown_str}")
+        return self
+
+
+class UnetParams(BaseModel):
+    """
+    Strict parameter schema for the UNet++ model.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    trained_model_file: Optional[str] = None
+    add_rnn: StrictBool = False
+    site_weighting: StrictBool = False
+    batch_size: StrictInt = Field(default=32, gt=0)
+    n_early: StrictInt = Field(default=10, gt=0)
+    n_epochs: StrictInt = Field(default=100, gt=0)
+    learning_rate: StrictFloat = Field(default=0.001, gt=0)
+    min_delta: StrictFloat = Field(default=1e-4, gt=0)
+    val_prop: StrictFloat = Field(default=0.05, gt=0, lt=1)
+    seed: Optional[StrictInt] = None
+    device: Optional[str] = None
+    num_workers: StrictInt = Field(default=0, ge=0)
+    train_drop_last: Optional[StrictBool] = None
+    val_drop_last: Optional[StrictBool] = None
+    persistent_workers: Optional[StrictBool] = None
+    prefetch_factor: Optional[StrictInt] = Field(default=None, gt=0)
+    use_amp: StrictBool = False
+    recent_window: StrictInt = Field(default=500, ge=1, le=1000)
 
 
 class ModelConfig(BaseModel):
     name: Literal["logistic_regression", "extra_trees_classifier", "unet++"]
     params: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    @model_validator(mode="after")
+    def validate_params_by_model_name(self) -> "ModelConfig":
+        """
+        Validate model params using strict per-model schemas.
+        """
+        schema_map = {
+            "logistic_regression": LrParams,
+            "extra_trees_classifier": EtcParams,
+            "unet++": UnetParams,
+        }
+        params_model = schema_map[self.name](**self.params)
+        self.params = params_model.model_dump()
+        extra = params_model.model_extra or {}
+        self.params.update(extra)
+        return self

@@ -18,34 +18,50 @@
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
 import pytest
-from typing import Any
-from pydantic import BaseModel, Field, ValidationError
-from typing import Literal
+from pydantic import ValidationError
+
 from gaishi.configs import ModelConfig
 
 
 def test_model_config_valid_logistic_regression():
     cfg = ModelConfig(
         name="logistic_regression",
-        params={"C": 1.0, "penalty": "l2", "max_iter": 200},
+        params={"C": 1.0, "max_iter": 200, "solver": "liblinear"},
     )
 
     assert cfg.name == "logistic_regression"
     assert cfg.params["C"] == 1.0
-    assert cfg.params["penalty"] == "l2"
     assert cfg.params["max_iter"] == 200
+    assert cfg.params["solver"] == "liblinear"
 
 
 def test_model_config_valid_extra_trees():
     cfg = ModelConfig(
         name="extra_trees_classifier",
-        params={"n_estimators": 500, "max_depth": None, "n_jobs": -1},
+        params={"n_estimators": 500, "max_depth": 8, "n_jobs": -1},
     )
 
     assert cfg.name == "extra_trees_classifier"
     assert cfg.params["n_estimators"] == 500
-    assert cfg.params["max_depth"] is None
+    assert cfg.params["max_depth"] == 8
     assert cfg.params["n_jobs"] == -1
+
+
+def test_model_config_valid_unet_params():
+    cfg = ModelConfig(
+        name="unet++",
+        params={"batch_size": 16, "learning_rate": 0.0005, "val_prop": 0.2},
+    )
+
+    assert cfg.name == "unet++"
+    assert cfg.params["batch_size"] == 16
+    assert cfg.params["learning_rate"] == 0.0005
+    assert cfg.params["val_prop"] == 0.2
+
+
+def test_model_config_unet_allows_site_weighting():
+    cfg = ModelConfig(name="unet++", params={"site_weighting": True})
+    assert cfg.params["site_weighting"] is True
 
 
 def test_model_config_invalid_name_raises():
@@ -56,6 +72,42 @@ def test_model_config_invalid_name_raises():
         )
 
 
+def test_model_config_extra_top_level_field_forbidden():
+    with pytest.raises(ValidationError):
+        ModelConfig(name="logistic_regression", extra_field=1)
+
+
 def test_model_config_params_default_is_empty_dict():
     cfg = ModelConfig(name="logistic_regression")
-    assert cfg.params == {}
+    assert cfg.params == {"is_scaled": False}
+
+
+def test_model_config_unknown_param_raises():
+    with pytest.raises(ValidationError):
+        ModelConfig(name="logistic_regression", params={"max_iterr": 100})
+
+
+def test_model_config_unknown_param_extra_trees_raises():
+    with pytest.raises(ValidationError):
+        ModelConfig(
+            name="extra_trees_classifier",
+            params={"n_estimatorss": 100},
+        )
+
+
+def test_model_config_unknown_param_unet_plusplus_raises():
+    with pytest.raises(ValidationError):
+        ModelConfig(
+            name="unet++",
+            params={"unknown": 1},
+        )
+
+
+def test_model_config_strict_mode_rejects_type_coercion():
+    with pytest.raises(ValidationError):
+        ModelConfig(name="unet++", params={"batch_size": "16"})
+
+
+def test_model_config_unet_boundaries_are_enforced():
+    with pytest.raises(ValidationError):
+        ModelConfig(name="unet++", params={"val_prop": 1.2})

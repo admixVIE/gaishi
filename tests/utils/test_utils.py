@@ -21,6 +21,7 @@ import pytest
 import numpy as np
 from gaishi.utils import split_genome
 from gaishi.utils import create_sample_name_list
+from gaishi.utils import filter_model_params_for_method
 
 
 @pytest.fixture
@@ -165,3 +166,35 @@ def test_create_sample_name_list(samples, ploidy, is_phased, expected):
     assert samples == original
     assert isinstance(out, list)
     assert all(isinstance(x, str) for x in out)
+
+
+def _method_with_kwargs(a, **kwargs):
+    return a
+
+
+def _method_without_kwargs(a, b=1, *, c=2):
+    return a + b + c
+
+
+def test_filter_model_params_for_method_keeps_all_when_var_kwargs_present():
+    params = {"a": 1, "x": 9, "y": 10}
+
+    out = filter_model_params_for_method(_method_with_kwargs, params)
+
+    assert out == params
+
+
+def test_filter_model_params_for_method_filters_unknown_keys():
+    params = {"a": 1, "b": 3, "c": 4, "x": 99}
+
+    out = filter_model_params_for_method(_method_without_kwargs, params)
+
+    assert out == {"a": 1, "b": 3, "c": 4}
+
+
+def test_filter_model_params_for_method_keeps_keyword_only_params():
+    params = {"a": 1, "c": 7}
+
+    out = filter_model_params_for_method(_method_without_kwargs, params)
+
+    assert out == {"a": 1, "c": 7}
