@@ -868,7 +868,9 @@ def test_train_logs_recent_500_metrics_every_1000_batches(tmp_path, monkeypatch)
     def _fake_build_dataloaders_from_h5(**_kwargs):
         return train_loader, val_loader, np.array([0]), np.array([1])
 
-    monkeypatch.setattr(unet_mod, "build_dataloaders_from_h5", _fake_build_dataloaders_from_h5)
+    monkeypatch.setattr(
+        unet_mod, "build_dataloaders_from_h5", _fake_build_dataloaders_from_h5
+    )
 
     unet_mod.UNetModel.train(
         data=training_data,
@@ -932,7 +934,9 @@ def test_train_raises_for_recent_window_greater_than_1000(tmp_path, monkeypatch)
     training_data = _make_training_h5(tmp_path, n_reps=10, N=2, L=7, with_gaps=True)
     model_path = tmp_path / "model_out_recent_window_limit" / "best.safetensors"
 
-    with pytest.raises(ValueError, match=r"`recent_window` must be an integer in \[1, 1000\]\."):
+    with pytest.raises(
+        ValueError, match=r"`recent_window` must be an integer in \[1, 1000\]\."
+    ):
         unet_mod.UNetModel.train(
             data=training_data,
             output=str(model_path),

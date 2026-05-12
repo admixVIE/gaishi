@@ -105,7 +105,7 @@ class WindowDataGenerator(GenericGenerator):
             end = windows[w][1][1]
             ref_gts = ref_data[chr_name]["GT"]
             tgt_gts = tgt_data[chr_name]["GT"]
-            idx = (pos > start) * (pos <= end)
+            idx = (pos >= start) & (pos <= end)
             sub_ref_gts = ref_gts[idx]
             sub_tgt_gts = tgt_gts[idx]
             sub_pos = pos[idx]

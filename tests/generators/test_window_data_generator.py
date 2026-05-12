@@ -61,7 +61,7 @@ def expected_params(file_paths):
         ref_gts = ref_data[chr_name]["GT"]
         tgt_gts = tgt_data[chr_name]["GT"]
         pos = tgt_data[chr_name]["POS"]
-        idx = (pos > start) * (pos <= end)
+        idx = (pos >= start) & (pos <= end)
         sub_ref_gts = ref_gts[idx]
         sub_tgt_gts = tgt_gts[idx]
         sub_pos = pos[idx]
@@ -101,3 +101,12 @@ def test_WindowDataGenerator(init_params, expected_params):
                 assert (
                     generated[key] == expected[key]
                 ), f"Values do not match for key {key}."
+
+
+def test_window_generator_uses_closed_interval_boundaries():
+    pos = np.array([1, 10, 20, 21, 30])
+    start = 10
+    end = 20
+    idx = (pos >= start) & (pos <= end)
+
+    assert np.array_equal(pos[idx], np.array([10, 20]))
