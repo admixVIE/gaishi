@@ -24,7 +24,7 @@ from gaishi.configs import GlobalConfig
 from gaishi.registries.model_registry import MODEL_REGISTRY
 from gaishi.simulate import simulate_feature_vectors
 from gaishi.simulate import simulate_genotype_matrices
-from gaishi.utils import UniqueKeyLoader
+from gaishi.utils import UniqueKeyLoader, filter_model_params_for_method
 
 
 def train(
@@ -84,6 +84,7 @@ def train(
     model_name = global_config.model.name
     model_params = global_config.model.params
     model_cls = MODEL_REGISTRY.get(model_name)
+    model_params = filter_model_params_for_method(model_cls.train, model_params)
     model_cls.train(
         data=data,
         output=output,

@@ -22,7 +22,7 @@ from gaishi.configs import GlobalConfig
 from gaishi.registries.model_registry import MODEL_REGISTRY
 from gaishi.preprocess import preprocess_feature_vectors
 from gaishi.preprocess import preprocess_genotype_matrices
-from gaishi.utils import UniqueKeyLoader
+from gaishi.utils import UniqueKeyLoader, filter_model_params_for_method
 
 
 def infer(
@@ -69,6 +69,7 @@ def infer(
     model_name = global_config.model.name
     model_params = global_config.model.params
     model_cls = MODEL_REGISTRY.get(model_name)
+    model_params = filter_model_params_for_method(model_cls.infer, model_params)
     model_cls.infer(
         data=data,
         model=model,
