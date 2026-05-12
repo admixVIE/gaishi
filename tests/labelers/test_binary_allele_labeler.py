@@ -44,7 +44,7 @@ def test_run_phased_labels_and_rep(set_vcf_positions, tmp_path):
             [
                 "chr1\t15\t45\tind1_1",  # => 20,30,40
                 "chr1\t0\t25\tind2_2",  # => 10,20
-                "chr1\t30\t40\tind1_2",  # => 30 (end exclusive)
+                "chr1\t30\t40\tind1_2",  # => 30 (right end exclusive)
                 "chr1\t1\t100\tghost_1",  # ignored
             ]
         )

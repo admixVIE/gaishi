@@ -333,12 +333,12 @@ def split_genome(
     seed: int = None,
 ) -> list[tuple]:
     """
-    Create sliding windows along the genome.
+    Create 1-based closed sliding windows along the genome.
 
     Parameters
     ----------
     pos : np.ndarray
-        Positions for the variants.
+        1-based genomic positions for the variants.
     chr_name : str
         Name of the chromosome.
     polymorphism_size : int
@@ -346,7 +346,7 @@ def split_genome(
     step_size : int, optional
         Step size of sliding windows. Default: None.
     window_based : bool, optional
-        Whether to create sliding windows containing the start and end positions (True)
+        Whether to create sliding windows containing inclusive start and end positions (True)
         or positions of each polymorphism within the window (False). Default: True.
     random_polymorphisms : bool, optional
         Whether to randomly select polymorphism positions (only used if window_based is False). Default: False.
@@ -378,12 +378,12 @@ def split_genome(
 
     if window_based:
         win_start = max(
-            0, (pos[0] + step_size) // step_size * step_size - polymorphism_size
+            1, (pos[0] + step_size) // step_size * step_size - polymorphism_size + 1
         )
         last_pos = pos[-1]
 
-        while last_pos > win_start:
-            win_end = win_start + polymorphism_size
+        while last_pos >= win_start:
+            win_end = win_start + polymorphism_size - 1
             window_positions.append((chr_name, [win_start, win_end]))
             win_start += step_size
     else:

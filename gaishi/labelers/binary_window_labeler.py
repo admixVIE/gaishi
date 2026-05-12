@@ -140,14 +140,14 @@ class BinaryWindowLabeler(GenericLabeler):
                         for p in range(self.ploidy):
                             label_df.loc[len(label_df.index)] = [
                                 1,
-                                0,
+                                1,
                                 self.win_len,
                                 f"{sample}_{p+1}",
                             ]
                 else:
                     for line in f:
                         sample = line.rstrip()
-                        label_df.loc[len(label_df.index)] = [1, 0, self.win_len, sample]
+                        label_df.loc[len(label_df.index)] = [1, 1, self.win_len, sample]
         except FileNotFoundError:
             raise FileNotFoundError(f"tgt_ind_file {tgt_ind_file} not found.")
 

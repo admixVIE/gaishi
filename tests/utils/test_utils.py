@@ -36,7 +36,14 @@ def test_split_genome_windows(pos):
         pos=pos, chr_name="1", polymorphism_size=50000, step_size=10000
     )
 
-    assert windows == [("1", [0, 50000])]
+    assert windows == [("1", [1, 50000])]
+
+
+def test_split_genome_windows_starts_at_one():
+    pos = np.array([1, 2, 3, 4, 5])
+    windows = split_genome(pos=pos, chr_name="1", polymorphism_size=3, step_size=2)
+
+    assert windows[0] == ("1", [1, 3])
 
 
 def test_split_genome_polymorphisms(pos):
