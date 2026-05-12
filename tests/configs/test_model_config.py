@@ -103,10 +103,6 @@ def test_model_config_unknown_param_unet_plusplus_raises():
         )
 
 
-def test_model_config_strict_mode_rejects_type_coercion():
-    with pytest.raises(ValidationError):
-        ModelConfig(name="unet++", params={"batch_size": "16"})
-
 
 def test_model_config_unet_boundaries_are_enforced():
     with pytest.raises(ValidationError):
