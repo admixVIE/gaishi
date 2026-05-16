@@ -51,6 +51,8 @@ def _gaishi_cli_parser() -> argparse.ArgumentParser:
     )
     top_parser.add_argument("--version", action="version", version=f"{__version__}")
     subparsers = top_parser.add_subparsers(dest="subparsers")
+    subparsers.required = True
+    
     add_train_parser(subparsers)
     add_infer_parser(subparsers)
 
