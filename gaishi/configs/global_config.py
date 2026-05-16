@@ -38,7 +38,7 @@ PreprocessConfigUnion = Annotated[
 
 class GlobalConfig(BaseModel):
     """
-    Top-level config for runing gaishi
+    Top-level config for running gaishi
 
     - training: simulation + model details.
     - infer: preprocess + model details.
