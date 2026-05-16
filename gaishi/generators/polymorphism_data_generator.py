@@ -174,7 +174,7 @@ class PolymorphismDataGenerator(GenericGenerator):
         self, gts: np.ndarray, num_samples: int, seed: int = None
     ) -> tuple[np.ndarray, list]:
         """
-        Upsamples the genotype data.
+        Upsample the genotype data.
 
         Parameters
         ----------
@@ -210,7 +210,7 @@ class PolymorphismDataGenerator(GenericGenerator):
 
     def __len__(self):
         """
-        Returns the number of polymorphism windows.
+        Return the number of polymorphism windows.
 
         Returns
         -------

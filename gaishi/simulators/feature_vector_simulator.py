@@ -56,7 +56,7 @@ class FeatureVectorSimulator(GenericSimulator):
         feature_config_file: str,
     ):
         """
-        Initializes a new instance of LRTrainingDataSimulator with specific parameters.
+        Initialize a new instance of LRTrainingDataSimulator with specific parameters.
 
         Parameters
         ----------
@@ -133,7 +133,7 @@ class FeatureVectorSimulator(GenericSimulator):
 
     def run(self, rep: int = None, seed: int = None) -> list[dict[str, Any]]:
         """
-        Executes the simulation, labeling, and feature vector generation workflow for a given replicate.
+        Execute the simulation, labeling, and feature vector generation workflow for a given replicate.
 
         This method runs the entire pipeline, from data simulation to feature vector generation, and merges
         the generated labels with the feature vectors based on sample identifiers. It is designed to facilitate

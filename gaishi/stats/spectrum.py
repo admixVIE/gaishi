@@ -40,7 +40,7 @@ class Spectrum(GenericStatistic):
     @staticmethod
     def compute(**kwargs) -> Dict[str, Any]:
         """
-        Computes per-individual frequency spectra for the target population.
+        Compute per-individual frequency spectra for the target population.
 
         Parameters
         ----------
@@ -75,7 +75,7 @@ class Spectrum(GenericStatistic):
     @staticmethod
     def _calc_n_ton(tgt_gt: np.ndarray, is_phased: bool, ploidy: int) -> np.ndarray:
         """
-        Computes individual frequency spectra for samples (ArchIE-style i-ton).
+        Compute individual frequency spectra for samples (ArchIE-style i-ton).
 
         Parameters
         ----------

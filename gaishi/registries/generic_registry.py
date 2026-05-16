@@ -60,7 +60,7 @@ class GenericRegistry(ABC):
 
     def get(self, name: str) -> Any:
         """
-        Retrieves a registered component by name.
+        Retrieve a registered component by name.
 
         Parameters
         ----------
@@ -78,7 +78,7 @@ class GenericRegistry(ABC):
 
     def list_registered(self) -> list[str]:
         """
-        Lists all registered component names.
+        List all registered component names.
 
         Returns
         -------

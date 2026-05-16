@@ -27,7 +27,7 @@ from gaishi.parsers.infer_parser import add_infer_parser
 
 def _set_sigpipe_handler() -> None:
     """
-    Sets the signal handler for SIGPIPE signals on POSIX systems.
+    Set the signal handler for SIGPIPE signals on POSIX systems.
     """
     import os, signal
 
@@ -38,7 +38,7 @@ def _set_sigpipe_handler() -> None:
 
 def _gaishi_cli_parser() -> argparse.ArgumentParser:
     """
-    Initializes and configures the command-line interface parser
+    Initialize and configure the command-line interface parser
     for gaishi.
 
     Returns

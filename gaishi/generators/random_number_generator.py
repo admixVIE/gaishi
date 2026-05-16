@@ -29,7 +29,7 @@ class RandomNumberGenerator(GenericGenerator):
 
     def __init__(self, nrep: int, start_rep: int = 0, seed: int = None):
         """
-        Initializes a new instance of RandomNumberGenerator.
+        Initialize a new instance of RandomNumberGenerator.
 
         Parameters
         ----------
@@ -68,7 +68,7 @@ class RandomNumberGenerator(GenericGenerator):
 
     def get(self):
         """
-        Yields dictionaries containing 'rep' and 'seed' values for each repetition.
+        Yield dictionaries containing 'rep' and 'seed' values for each repetition.
 
         Yields
         ------

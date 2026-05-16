@@ -36,7 +36,7 @@ class PrivateMutation(GenericStatistic):
     @staticmethod
     def compute(**kwargs) -> Dict[str, Any]:
         """
-        Computes per-sample private-variant counts.
+        Compute per-sample private-variant counts.
 
         Parameters
         ----------

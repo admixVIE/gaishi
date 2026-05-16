@@ -26,7 +26,7 @@ from threading import Thread
 
 def monitor(shared_dict: dict, workers: list[multiprocessing.Process]) -> None:
     """
-    Monitors worker processes to ensure they complete successfully, initiating shutdown if any worker fails.
+    Monitor worker processes to ensure they complete successfully, initiating shutdown if any worker fails.
 
     Continuously checks the status of each worker process through a shared dictionary. If all workers
     have completed successfully, the monitoring loop exits. If any worker process terminates without
@@ -73,7 +73,7 @@ def monitor(shared_dict: dict, workers: list[multiprocessing.Process]) -> None:
 
 def terminate_all_workers(workers: list[multiprocessing.Process]) -> None:
     """
-    Terminates all worker processes and waits for them to complete.
+    Terminate all worker processes and wait for them to complete.
 
     Sends a terminate signal to each worker process in the provided list and waits for each
     to join, ensuring all processes are properly terminated before proceeding.
@@ -101,7 +101,7 @@ def mp_manager(
     job: callable, data_generator: GenericGenerator, nprocess: int, **kwargs
 ) -> list:
     """
-    Manages the distribution of tasks across multiple processes for parallel execution, ensuring
+    Manage the distribution of tasks across multiple processes for parallel execution, ensuring
     reproducibility through controlled seed values for each task.
 
     This function initializes a pool of worker processes and distributes tasks among them.

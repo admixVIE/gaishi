@@ -40,7 +40,7 @@ class WindowDataGenerator(GenericGenerator):
         is_phased: bool = True,
     ):
         """
-        Initializes a new instance of WindowDataGenerator.
+        Initialize a new instance of WindowDataGenerator.
 
         Parameters
         ----------
@@ -125,7 +125,7 @@ class WindowDataGenerator(GenericGenerator):
 
     def get(self):
         """
-        Yields genomic data for each window.
+        Yield genomic data for each window.
 
         Yields
         ------

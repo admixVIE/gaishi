@@ -40,7 +40,7 @@ class Sstar(GenericStatistic):
         **kwargs,
     ) -> Dict[str, Any]:
         """
-        Computes S* scores for each target sample (column).
+        Compute S* scores for each target sample (column).
 
         Parameters
         ----------

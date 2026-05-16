@@ -33,7 +33,7 @@ class GenericStatistic(ABC):
     @abstractmethod
     def compute(self, **kwargs) -> Dict[str, Any]:
         """
-        Computes the statistic based on the input genotype data.
+        Compute the statistic based on the input genotype data.
 
         Parameters
         ----------
