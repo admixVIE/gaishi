@@ -43,7 +43,7 @@ class BinaryWindowLabeler(GenericLabeler):
         non_intro_prop: float,
     ):
         """
-        Initializes a new instance of BinaryWindowLabeler with specific parameters.
+        Initialize a new instance of BinaryWindowLabeler with specific parameters.
 
         Parameters
         ----------
@@ -97,7 +97,7 @@ class BinaryWindowLabeler(GenericLabeler):
         self, tgt_ind_file: str, true_tract_file: str, rep: int = None
     ) -> list[dict[str, Any]]:
         """
-        Executes the labeling process by analyzing genomic tracts and labeling
+        Execute the labeling process by analyzing genomic tracts and labeling
         windows as introgressed or not, based on a specified proportion threshold.
 
         This method operates on genomic data for a specified target population,

@@ -33,7 +33,7 @@ class GenericGenerator(ABC):
     @abstractmethod
     def get(self, **kwargs):
         """
-        Generates data based on the provided keyword arguments.
+        Generate data based on the provided keyword arguments.
 
         Subclasses should implement this method to generate and return data
         according to the requirements described by the keyword arguments.

@@ -38,7 +38,7 @@ class FeatureVectorPreprocessor(GenericPreprocessor):
 
     def __init__(self, ref_ind_file: str, tgt_ind_file: str, feature_config_file: str):
         """
-        Initializes a new instance of FeatureVectorsPreprocessor with specific parameters.
+        Initialize a new instance of FeatureVectorPreprocessor with specific parameters.
 
         Parameters:
         -----------
@@ -87,7 +87,7 @@ class FeatureVectorPreprocessor(GenericPreprocessor):
         pos: np.ndarray,
     ) -> list[dict[str, Any]]:
         """
-        Executes the feature vector generation process for a specified genomic window.
+        Execute the feature vector generation process for a specified genomic window.
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class FeatureVectorPreprocessor(GenericPreprocessor):
         is_phased: bool,
     ) -> list[dict[str, Any]]:
         """
-        Formats the result dictionaries into a pandas DataFrame with appropriate headers.
+        Format the result dictionaries into a pandas DataFrame with appropriate headers.
 
         Parameters
         ----------
@@ -219,7 +219,7 @@ class FeatureVectorPreprocessor(GenericPreprocessor):
         pop: str,
     ) -> dict[str, float]:
         """
-        Formats distance-related results for a single sample and population (reference or target).
+        Format distance-related results for a single sample and population (reference or target).
 
         Parameters
         ----------

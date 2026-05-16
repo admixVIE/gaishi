@@ -46,7 +46,7 @@ class GenericSimulator(ABC):
         output_dir: str,
     ):
         """
-        Initializes a new instance of the DataSimulator class with specified parameters for data simulation.
+        Initialize a new instance of the GenericSimulator class with specified parameters for data simulation.
 
         Parameters
         ----------
@@ -92,7 +92,7 @@ class GenericSimulator(ABC):
     @abstractmethod
     def run(self, **kwargs):
         """
-        Executes the simulation task.
+        Execute the simulation task.
 
         This method should be implemented by subclasses to perform the specific simulation work. It
         is called to start the simulation process based on the parameters initialized during the

@@ -27,7 +27,7 @@ class MsprimeSimulator(GenericSimulator):
     MsprimeSimulator extends GenericSimulator to simulate genetic data using the msprime package.
 
     This subclass specifies simulation parameters for msprime and inherits additional
-    simulation configuration from the DataSimulator class.
+    simulation configuration from the GenericSimulator class.
 
     """
 
@@ -48,7 +48,7 @@ class MsprimeSimulator(GenericSimulator):
         is_phased: bool,
     ):
         """
-        Initializes a new instance of MsprimeSimulator with specific parameters for msprime simulations.
+        Initialize a new instance of MsprimeSimulator with specific parameters for msprime simulations.
 
         Parameters
         ----------
@@ -110,7 +110,7 @@ class MsprimeSimulator(GenericSimulator):
 
     def run(self, rep: int = None, seed: int = None) -> list[dict[str, str]]:
         """
-        Executes the simulation with optional runtime arguments.
+        Execute the simulation with optional runtime arguments.
 
         Outputs multiple files including simulation results and metadata.
 
@@ -209,7 +209,7 @@ class MsprimeSimulator(GenericSimulator):
         identifier: str = "tsk_",
     ) -> None:
         """
-        Creates files listing reference and target individual identifiers.
+        Create files listing reference and target individual identifiers.
 
         Parameters
         ----------
@@ -242,7 +242,7 @@ class MsprimeSimulator(GenericSimulator):
         is_phased: bool,
     ) -> str:
         """
-        Generates a string representing the true migration tracts between specified source and target populations within a given tskit.TreeSequence.
+        Generate a string representing the true migration tracts between specified source and target populations within a given tskit.TreeSequence.
 
         Parameters
         ----------

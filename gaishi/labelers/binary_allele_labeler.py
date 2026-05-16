@@ -30,7 +30,7 @@ class BinaryAlleleLabeler(GenericLabeler):
 
     def __init__(self, ploidy: int, is_phased: bool, num_polymorphisms: int):
         """
-        Initializes a new instance of BinaryAlleleLabeler with given ploidy, phasing status, and number of polymorphisms.
+        Initialize a new instance of BinaryAlleleLabeler with given ploidy, phasing status, and number of polymorphisms.
 
         Parameters
         ----------
@@ -52,7 +52,7 @@ class BinaryAlleleLabeler(GenericLabeler):
         self, tgt_ind_file: str, vcf_file: str, true_tract_file: str, rep: int = None
     ) -> dict:
         """
-        Runs the allele labeling process.
+        Run the allele labeling process.
 
         Parameters
         ----------

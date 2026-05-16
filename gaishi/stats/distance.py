@@ -36,7 +36,7 @@ class Distance(GenericStatistic):
     @staticmethod
     def compute(**kwargs) -> Dict[str, Any]:
         """
-        Computes pairwise Euclidean distances for two genotype matrices.
+        Compute pairwise Euclidean distances for two genotype matrices.
 
         Parameters
         ----------
@@ -126,7 +126,7 @@ class RefDistance(GenericStatistic):
     @staticmethod
     def compute(**kwargs) -> Dict[str, Any]:
         """
-        Computes distances from reference to target samples.
+        Compute distances from reference to target samples.
 
         Parameters
         ----------
@@ -163,7 +163,7 @@ class TgtDistance(GenericStatistic):
     @staticmethod
     def compute(**kwargs):
         """
-        Computes self-distances among target samples.
+        Compute self-distances among target samples.
 
         Parameters
         ----------
