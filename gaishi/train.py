@@ -70,7 +70,7 @@ def train(
     elif global_config.simulation.sim_type == "genotype_matrix":
         data = f"{global_config.simulation.output_dir}/{global_config.simulation.output_prefix}.h5"
         if not os.path.exists(data):
-            print("Training data is not found. Perform simulation.")
+            print("No training data found. Performing simulation ...")
             simulate_genotype_matrices(
                 demo_model_file=demes,
                 **global_config.simulation.model_dump(),
