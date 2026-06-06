@@ -24,7 +24,7 @@ from gaishi.models.unet.layers import ResidualConcatBlock
 
 class UNetPlusPlus(nn.Module):
     """
-    UNet++ segmentation network.
+    UNet++ segmentation network (Adapted from IntroUNet).
 
     This implementation follows the UNet++ design where decoder features at a given resolution
     are constructed through nested, dense skip connections. At each decoder node, feature maps
