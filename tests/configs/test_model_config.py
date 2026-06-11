@@ -79,7 +79,7 @@ def test_model_config_extra_top_level_field_forbidden():
 
 def test_model_config_params_default_is_empty_dict():
     cfg = ModelConfig(name="logistic_regression")
-    assert cfg.params == {"is_scaled": False}
+    assert cfg.params == {}
 
 
 def test_model_config_unknown_param_raises():

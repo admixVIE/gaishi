@@ -20,7 +20,6 @@
 import inspect, joblib, os
 import pandas as pd
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.preprocessing import StandardScaler
 from gaishi.models import MlModel
 from gaishi.registries.model_registry import MODEL_REGISTRY
 
@@ -48,11 +47,7 @@ class EtcModel(MlModel):
         The input feature table is read from a tab-separated file, a model is
         fitted, and the trained model is written to disk. Any keyword arguments
         in `model_params` are forwarded to the underlying
-        :class:`sklearn.ensemble.ExtraTreesClassifier`. If data scaling is
-        enabled (e.g. via an `is_scaled` flag in `model_params`), the feature
-        matrix is scaled using :class:`sklearn.preprocessing.StandardScaler`
-        and the fitted scaler is saved alongside the model file.
-
+        :class:`sklearn.ensemble.ExtraTreesClassifier`.
         Parameters
         ----------
         data : str
@@ -65,8 +60,6 @@ class EtcModel(MlModel):
             Additional keyword arguments controlling the model and optional
             preprocessing. These are passed to the underlying extra-trees
             classifier (for example `n_estimators`, `max_depth`, `random_state`)
-            and may also include flags such as `is_scaled` to indicate that
-            the feature data should be standardized before training.
         """
         features = pd.read_csv(data, sep="\t")
 
@@ -78,11 +71,6 @@ class EtcModel(MlModel):
         data = features.drop(
             columns=["Chromosome", "Start", "End", "Sample", "Replicate", "Label"]
         ).values
-
-        if "is_scaled" in model_params and model_params["is_scaled"]:
-            scaler = StandardScaler()
-            data = scaler.fit_transform(data)
-            joblib.dump(scaler, f"{output}.scaler")
 
         is_allowed = inspect.signature(ExtraTreesClassifier).parameters
         clean_params = {k: v for k, v in model_params.items() if k in is_allowed}
@@ -104,11 +92,8 @@ class EtcModel(MlModel):
 
         The feature table is read from a tab-separated file, the trained model is
         loaded from disk, and predictions are written to the specified output.
-        Any keyword arguments in `model_params` are forwarded to the underlying
-        :class:`sklearn.ensemble.ExtraTreesClassifier` or used to control
-        optional preprocessing. If an `is_scaled` flag is provided and set to
-        True, a scaler object is loaded from `<model>.scaler` and applied to
-        the feature matrix before inference.
+        Any keyword arguments in `model_params` are accepted for API compatibility
+        and ignored during inference.
 
         Parameters
         ----------
@@ -118,19 +103,12 @@ class EtcModel(MlModel):
             data, along with any metadata columns that will be dropped before
             prediction.
         model : str
-            Path to the saved trained model (e.g. a joblib pickle). If
-            `is_scaled=True` is passed via `model_params`, the method will
-            also look for a corresponding scaler file at `<model>.scaler` and
-            apply it to the features.
+            Path to the saved trained model (e.g. a joblib pickle).
         output : str
             Path where the inference output (e.g. predicted labels or
             probabilities) will be written.
         **model_params
-            Additional keyword arguments controlling the model and optional
-            preprocessing. These are typically forwarded to the underlying
-            extra-trees classifier (for example `n_jobs`, `random_state`) and
-            may include an `is_scaled` flag indicating that a saved scaler
-            should be loaded and applied prior to prediction.
+            Additional keyword arguments accepted for API compatibility.
         """
         features = pd.read_csv(data, sep="\t")
         output_dir = os.path.dirname(output)
@@ -138,18 +116,6 @@ class EtcModel(MlModel):
             os.makedirs(output_dir, exist_ok=True)
 
         data = features.drop(columns=["Chromosome", "Start", "End", "Sample"]).values
-
-        if "is_scaled" in model_params and model_params["is_scaled"]:
-            scaler_path = f"{model}.scaler"
-            try:
-                scaler = joblib.load(scaler_path)
-            except FileNotFoundError:
-                raise FileNotFoundError(
-                    f"Scaler file not found: {scaler_path}. Please ensure the scaler was saved during training."
-                )
-            except Exception as e:
-                raise RuntimeError(f"Failed to load scaler from {scaler_path}: {e}")
-            data = scaler.transform(data)
 
         model = joblib.load(model)
 

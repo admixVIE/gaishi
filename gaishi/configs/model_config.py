@@ -33,15 +33,12 @@ class LrParams(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    is_scaled: bool = False
-
     @model_validator(mode="after")
     def validate_known_keys(self) -> "LrParams":
         """
-        Validate keys against LogisticRegression signature plus gaishi-specific keys.
+        Validate keys against LogisticRegression signature.
         """
         allowed_keys = set(inspect.signature(LogisticRegression).parameters)
-        allowed_keys.add("is_scaled")
         unknown_keys = set(self.model_extra or {}).difference(allowed_keys)
         if unknown_keys:
             unknown_str = ", ".join(sorted(unknown_keys))
@@ -56,15 +53,12 @@ class EtcParams(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    is_scaled: bool = False
-
     @model_validator(mode="after")
     def validate_known_keys(self) -> "EtcParams":
         """
-        Validate keys against ExtraTreesClassifier signature plus gaishi-specific keys.
+        Validate keys against ExtraTreesClassifier signature.
         """
         allowed_keys = set(inspect.signature(ExtraTreesClassifier).parameters)
-        allowed_keys.add("is_scaled")
         unknown_keys = set(self.model_extra or {}).difference(allowed_keys)
         if unknown_keys:
             unknown_str = ", ".join(sorted(unknown_keys))
