@@ -97,7 +97,7 @@ def test_global_config_valid_with_logistic_regression():
 
     cfg = GlobalConfig(
         simulation=sim_cfg,
-        preprocess=preprocess_cfg,
+        preprocessing=preprocess_cfg,
         model=model_cfg,
     )
 
@@ -105,10 +105,10 @@ def test_global_config_valid_with_logistic_regression():
     assert cfg.simulation.nrep == 10
     assert cfg.simulation.seq_len == 1_000_000
 
-    # preprocess block
-    assert cfg.preprocess.chr_name == "chr1"
-    assert isinstance(cfg.preprocess.vcf_file, Path)
-    assert cfg.preprocess.win_len == 10000
+    # preprocessing block
+    assert cfg.preprocessing.chr_name == "chr1"
+    assert isinstance(cfg.preprocessing.vcf_file, Path)
+    assert cfg.preprocessing.win_len == 10000
 
     # model block
     assert cfg.model.name == "logistic_regression"
@@ -122,7 +122,7 @@ def test_global_config_valid_with_extra_trees():
 
     cfg = GlobalConfig(
         simulation=sim_cfg,
-        preprocess=preprocess_cfg,
+        preprocessing=preprocess_cfg,
         model=model_cfg,
     )
 
@@ -137,12 +137,12 @@ def test_global_config_missing_simulation_raises():
 
     with pytest.raises(ValidationError):
         GlobalConfig(
-            preprocess=preprocess_cfg,
+            preprocessing=preprocess_cfg,
             model=model_cfg,
         )  # type: ignore[arg-type]
 
 
-def test_infer_config_missing_preprocess_raises():
+def test_infer_config_missing_preprocessing_raises():
     sim_cfg = FeatureVectorSimulationConfig(**_valid_simulation_kwargs())
     model_cfg = _valid_model_config_logreg()
 
@@ -160,7 +160,7 @@ def test_global_config_missing_model_type_raises():
     with pytest.raises(ValidationError):
         GlobalConfig(
             simulation=sim_cfg,
-            preprocess=preprocess_cfg,
+            preprocessing=preprocess_cfg,
         )  # type: ignore[arg-type]
 
 
@@ -171,7 +171,7 @@ def test_global_config_invalid_model_name_raises():
     with pytest.raises(ValidationError):
         GlobalConfig(
             simulation=sim_cfg,
-            preprocess=preprocess_cfg,
+            preprocessing=preprocess_cfg,
             model=ModelConfig(
                 name="random_forest",  # not allowed by Literal
                 params={"n_estimators": 100},
@@ -202,7 +202,7 @@ def test_global_config_simulation_discriminates_feature_vector():
             "output_dir": Path("results/train"),
             "seed": 42,
         },
-        preprocess=FeatureVectorPreprocessConfig(**_valid_preprocess_kwargs()),
+        preprocessing=FeatureVectorPreprocessConfig(**_valid_preprocess_kwargs()),
         model=_valid_model_config_logreg(),
     )
 
@@ -231,7 +231,7 @@ def test_global_config_simulation_discriminates_genotype_matrix():
             "output_dir": Path("results/train"),
             "seed": 42,
         },
-        preprocess=FeatureVectorPreprocessConfig(**_valid_preprocess_kwargs()),
+        preprocessing=FeatureVectorPreprocessConfig(**_valid_preprocess_kwargs()),
         model=_valid_model_config_logreg(),
     )
 

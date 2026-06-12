@@ -41,7 +41,7 @@ class GlobalConfig(BaseModel):
     Top-level config for running gaishi
 
     - training: simulation + model details.
-    - infer: preprocess + model details.
+    - infer: preprocessing + model details.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -49,8 +49,8 @@ class GlobalConfig(BaseModel):
     # Simulation block
     simulation: SimulationConfigUnion
 
-    # Preprocess block
-    preprocess: PreprocessConfigUnion
+    # Preprocessing block
+    preprocessing: PreprocessConfigUnion
 
     # Model choice
     model: ModelConfig

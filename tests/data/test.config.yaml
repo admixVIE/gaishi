@@ -22,7 +22,7 @@ simulation:
   nprocess: 2
   seed: 12345
 
-preprocess:
+preprocessing:
   process_type: "feature_vector"
   vcf_file: "tests/expected_results/simulators/MsprimeSimulator/0/test.0.vcf"
   chr_name: "1"
