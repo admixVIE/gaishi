@@ -17,7 +17,13 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import joblib, os, pytest, shutil
+import json
+import os
+import shutil
+
+import onnxruntime as ort
+import pytest
+
 import gaishi.models
 import gaishi.stats
 from gaishi.train import train
@@ -31,16 +37,14 @@ def file_paths():
     return {
         "demes": "tests/data/ArchIE_3D19.yaml",
         "config": "tests/data/test.config.yaml",
-        "output": os.path.join(output_dir, "test.lr.model"),
+        "output": os.path.join(output_dir, "test.lr.onnx"),
         "output_dir": output_dir,
     }
 
 
 @pytest.fixture
 def cleanup_output_dir(request, file_paths):
-    # Setup (nothing to do before the test)
-    yield  # Hand over control to the test
-    # Teardown
+    yield
     shutil.rmtree(file_paths["output_dir"], ignore_errors=True)
 
 
@@ -51,16 +55,20 @@ def test_train(file_paths, cleanup_output_dir):
         output=file_paths["output"],
     )
 
-    model = joblib.load(file_paths["output"])
-    expected_model = joblib.load("tests/expected_results/train/test.lr.model")
+    session_options = ort.SessionOptions()
+    session_options.intra_op_num_threads = 1
+    session_options.inter_op_num_threads = 1
 
-    tolerance = 1e-5
+    session = ort.InferenceSession(
+        file_paths["output"],
+        sess_options=session_options,
+        providers=["CPUExecutionProvider"],
+    )
 
-    assert (
-        model.coef_.shape == expected_model.coef_.shape
-    ), "Model coefficient shapes do not match."
-    # assert all(abs(a - b) < tolerance for a, b in zip(model.coef_.flatten(), expected_model.coef_.flatten())), "Coefficients do not match within tolerance."
-    # assert abs(model.intercept_ - expected_model.intercept_) < tolerance
+    metadata = session.get_modelmeta().custom_metadata_map
+
+    assert json.loads(metadata["classes"]) == [0, 1]
+    assert len(session.get_inputs()) == 1
 
 
 def test_train_only_simulation(file_paths, cleanup_output_dir):

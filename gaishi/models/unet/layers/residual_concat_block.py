@@ -24,7 +24,7 @@ import torch.nn as nn
 class ResidualConcatBlock(nn.Module):
     """
     Convolutional block with residual accumulation and channel-wise concatenation (Adapted from IntroUNet).
-    
+
     This block applies a stack of `n_layers` 2D convolutions. Each convolution is followed
     by instance normalization and spatial dropout. Starting from the second layer, a residual
     connection is applied within the block by adding the current layer output to the previous

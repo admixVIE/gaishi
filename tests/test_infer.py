@@ -17,34 +17,47 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import os, pytest, shutil
+import os
+import shutil
+
+import joblib
 import pandas as pd
+import pytest
+
 import gaishi.models
 import gaishi.stats
 from gaishi.infer import infer
+from gaishi.models.onnx_utils import save_sklearn_classifier_as_onnx
 
 
 @pytest.fixture
 def file_paths():
     output_dir = "tests/test_infer"
     return {
-        "model": "tests/expected_results/train/test.lr.model",
+        "reference_model": "tests/expected_results/train/test.lr.model",
+        "model": os.path.join(output_dir, "test.lr.onnx"),
         "config": "tests/data/test.config.yaml",
         "output": os.path.join(output_dir, "test.lr.predictions"),
-        "output_dir": str(output_dir),
+        "expected_output": "tests/expected_results/infer/test.lr.predictions",
+        "output_dir": output_dir,
     }
 
 
 @pytest.fixture
 def cleanup_output_dir(request, file_paths):
-    # Setup (nothing to do before the test)
-    yield  # Hand over control to the test
-    # Teardown
+    yield
     shutil.rmtree(file_paths["output_dir"], ignore_errors=True)
 
 
 def test_infer(file_paths, cleanup_output_dir):
     os.makedirs(file_paths["output_dir"], exist_ok=True)
+
+    reference_model = joblib.load(file_paths["reference_model"])
+    save_sklearn_classifier_as_onnx(
+        reference_model,
+        file_paths["model"],
+        reference_model.n_features_in_,
+    )
 
     infer(
         model=file_paths["model"],
@@ -53,10 +66,7 @@ def test_infer(file_paths, cleanup_output_dir):
     )
 
     df = pd.read_csv(file_paths["output"], sep="\t")
-
-    expected_df = pd.read_csv(
-        "tests/expected_results/infer/test.lr.predictions", sep="\t"
-    )
+    expected_df = pd.read_csv(file_paths["expected_output"], sep="\t")
 
     pd.testing.assert_frame_equal(
         df,

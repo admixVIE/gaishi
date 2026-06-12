@@ -17,8 +17,13 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import joblib, os, pytest, shutil
+import json
+import os
+import shutil
+
+import onnxruntime as ort
 import pandas as pd
+import pytest
 from gaishi.models import EtcModel
 
 
@@ -28,7 +33,7 @@ def file_paths():
     return {
         "training_data": "tests/data/test.training.features",
         "inference_data": "tests/data/test.inference.features",
-        "training_output": os.path.join(output_dir, "test.etc.model"),
+        "training_output": os.path.join(output_dir, "test.etc.onnx"),
         "inference_output": os.path.join(output_dir, "test.etc.pred.tsv"),
         "model_params": {
             "n_estimators": 100,
@@ -55,20 +60,27 @@ def test_EtcModel_train(file_paths, cleanup_output_dir):
         **file_paths["model_params"],
     )
 
-    model = joblib.load(file_paths["training_output"])
-    expected_model = joblib.load("tests/expected_results/models/test.etc.model")
+    session = ort.InferenceSession(
+        file_paths["training_output"],
+        providers=["CPUExecutionProvider"],
+    )
+    metadata = session.get_modelmeta().custom_metadata_map
 
-    assert (
-        model.feature_importances_.shape == expected_model.feature_importances_.shape
-    ), "The shapes of model feature importances do not match."
+    assert json.loads(metadata["classes"]) == [0, 1]
+    assert len(session.get_inputs()) == 1
 
 
 def test_EtcModel_infer(file_paths, cleanup_output_dir):
     os.makedirs(file_paths["output_dir"], exist_ok=True)
 
+    EtcModel.train(
+        data=file_paths["training_data"],
+        output=file_paths["training_output"],
+        **file_paths["model_params"],
+    )
     EtcModel.infer(
         data=file_paths["inference_data"],
-        model="tests/expected_results/models/test.etc.model",
+        model=file_paths["training_output"],
         output=file_paths["inference_output"],
         **file_paths["model_params"],
     )

@@ -17,10 +17,15 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import inspect, joblib, os
+import inspect
+import os
+
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import ExtraTreesClassifier
 from gaishi.models import MlModel
+from gaishi.models.onnx_utils import predict_proba_with_onnx_classifier
+from gaishi.models.onnx_utils import save_sklearn_classifier_as_onnx
 from gaishi.registries.model_registry import MODEL_REGISTRY
 
 pd.options.mode.chained_assignment = None
@@ -55,7 +60,7 @@ class EtcModel(MlModel):
             is expected to contain a `Label` column and any required metadata
             columns, which will be dropped before model fitting.
         output : str
-            Path where the trained model will be saved (e.g. a joblib pickle).
+            Path where the trained ONNX model will be saved.
         **model_params
             Additional keyword arguments controlling the model and optional
             preprocessing. These are passed to the underlying extra-trees
@@ -78,7 +83,11 @@ class EtcModel(MlModel):
         model = ExtraTreesClassifier(**clean_params)
         model.fit(data, labels.astype(int))
 
-        joblib.dump(model, output)
+        save_sklearn_classifier_as_onnx(
+            model=model,
+            output=output,
+            n_features=data.shape[1],
+        )
 
     @staticmethod
     def infer(
@@ -91,7 +100,7 @@ class EtcModel(MlModel):
         Perform inference with a trained extra-trees classifier on new data.
 
         The feature table is read from a tab-separated file, the trained model is
-        loaded from disk, and predictions are written to the specified output.
+        loaded with ONNX Runtime, and predictions are written to the specified output.
         Any keyword arguments in `model_params` are accepted for API compatibility
         and ignored during inference.
 
@@ -103,7 +112,7 @@ class EtcModel(MlModel):
             data, along with any metadata columns that will be dropped before
             prediction.
         model : str
-            Path to the saved trained model (e.g. a joblib pickle).
+            Path to the saved trained ONNX model.
         output : str
             Path where the inference output (e.g. predicted labels or
             probabilities) will be written.
@@ -115,11 +124,14 @@ class EtcModel(MlModel):
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
 
-        data = features.drop(columns=["Chromosome", "Start", "End", "Sample"]).values
+        data = features.drop(columns=["Chromosome", "Start", "End", "Sample"]).to_numpy(
+            dtype=np.float32
+        )
 
-        model = joblib.load(model)
-
-        predictions = model.predict_proba(data)
+        classes, predictions = predict_proba_with_onnx_classifier(
+            model=model,
+            data=data,
+        )
         prediction_df = features[["Chromosome", "Start", "End", "Sample"]]
 
         class_names = {
@@ -127,7 +139,6 @@ class EtcModel(MlModel):
             "1": "Intro",
         }
 
-        classes = model.classes_
         for i in range(len(classes)):
             class_name = class_names[f"{classes[i]}"]
             prediction_df[f"{class_name}_Prob"] = predictions[:, i]

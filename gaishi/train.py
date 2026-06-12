@@ -62,7 +62,7 @@ def train(
     if global_config.simulation.sim_type == "feature_vector":
         data = f"{global_config.simulation.output_dir}/{global_config.simulation.output_prefix}.tsv"
         if not os.path.exists(data):
-            print("Training data is not found. Perform simulation.")
+            print("No training data found. Performing simulation ...")
             simulate_feature_vectors(
                 demo_model_file=demes,
                 **global_config.simulation.model_dump(),
