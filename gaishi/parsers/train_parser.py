@@ -59,22 +59,22 @@ def add_train_parser(subparsers: argparse.ArgumentParser) -> None:
         "--demes",
         type=existed_file,
         required=True,
-        help="Path to the demes file.",
+        help="Path to the DEMES demographic model file.",
     )
     parser.add_argument(
         "--config",
         type=existed_file,
         required=True,
-        help="Path to the config file.",
+        help="Path to the `GAISHI` configuration YAML file.",
     )
     parser.add_argument(
         "--output",
         default=None,
-        help="Path to the output file.",
+        help="Path to the trained model output file. Required unless `--only-simulation` is used.",
     )
     parser.add_argument(
         "--only-simulation",
         action="store_true",
-        help="Only run simulation and skip model training.",
+        help="Run simulation only and skip model training.",
     )
     parser.set_defaults(runner=_run_train)

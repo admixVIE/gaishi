@@ -1,23 +1,17 @@
-site_name: gaishi
+site_name: GAISHI
 site_url: "https://xin-huang.github.io/gaishi"
 repo_url: "https://github.com/xin-huang/gaishi"
 edit_uri: ""
 docs_dir: 'docs'
 theme:
   name: material
+  features:
+    - content.code.copy
   palette:
-    primary: teal
-    accent: indigo
+    primary: cyan
+    accent: cyan
 plugins:
   - search
-#  - mkdocstrings:
-#      default_handler: python
-#      handlers:
-#        python:
-#          rendering:
-#            show_source: true
-#      watch:
-#        - gaishi
 markdown_extensions:
   - extra
   - tables
@@ -29,6 +23,7 @@ extra_javascript:
 nav:
 - Home: 'index.md'
 - User Guide:
-  - Logistic Regression: 'userguide/lr.md'
-  - U-Net: 'userguide/unet.md'
-  - Performance: 'userguide/eval.md'
+  - Overview: 'userguide/overview.md'
+  - Configuration: 'userguide/configuration.md'
+  - train: 'userguide/train.md'
+  - infer: 'userguide/infer.md'

@@ -1,68 +1,66 @@
 # GAISHI
 
-`gaishi` is a Python package for **G**enomic **A**nalysis of **I**ntrogressed-**S**ite and -**H**aplotype **Identification** using machine learning. 
-Currently, it supports three types of models:
+`GAISHI` is a Python package for **G**enomic **A**nalysis of **I**ntrogressed-**S**ite and -**H**aplotype **I**dentification using machine learning.
 
-- Logistic regression models
-- Extra-trees classifiers
-- U-Net models
+It supports:
 
-`gaishi` uses established population genetic simulators like `msprime` for generating training and test data. 
-It can be applied to detect introgressed fragments or alleles in genomes from various species.
+- logistic regression models
+- extra-trees classifiers
+- UNet++ models
 
-## Requirements
+### Requirements
 
-`gaishi` works on UNIX/LINUX operating systems and tested with the following:
+`GAISHI` works on Unix/Linux operating systems and is tested with the environment in this [env.yaml](https://github.com/xin-huang/gaishi/blob/main/env.yaml):
 
-- Python 3.9
+- Python 3.9.19
 - Python packages:
-
+    - black=24.10.0
     - demes=0.2.3
+    - flake8=7.1.1
     - h5py=3.10.0
-    - joblib=1.3.2
     - msprime=1.3.1
     - numpy=1.26.4
+    - onnx=1.11.0
+    - onnxconverter-common==1.9.0
+    - onnxruntime=1.19.2
+    - ortools==8.2.8710
     - pandas=2.2.1
+    - pip=24.0
+    - protobuf=3.20.0
     - pydantic=2.11.7
-    - python=3.9.19
     - pyranges=0.0.129
     - pytest=8.1.1
+    - pytest-cov=5.0.0
+    - pyyaml=6.0.1
+    - safetensors==0.4.5
     - scikit-allel=1.3.7
     - scikit-learn=1.4.1.post1
     - scipy=1.12.0
-    - tskit=0.5.6
-    - pyyaml=6.0.1
-    - seriate==1.1.2
+    - skl2onnx==1.11.2
     - torch==2.2.0
+    - tskit=0.5.6
+    - https://github.com/xin-huang/seriate.git@dev
 
-## Installation
+### Installation
 
-Users can install `gaishi` by using the following commands:
+Users can install `GAISHI` with [mamba](https://github.com/mamba-org/mamba):
 
 ```
 git clone https://github.com/xin-huang/gaishi
 cd gaishi
-mamba env create -f env.yaml
-mamba activate gaishi
+mamba env create -f build-env.yaml
+conda activate gaishi
 pip install .
 ```
 
-Users first need to install [mamba](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) to create the virtual environment.
+To check the installation:
 
-## Help
-
-To get help information, users can use:
-
-```         
+```
 gaishi -h
 ```
 
-This will display information for three commands:
+### Citations
 
-| Command | Description |
-| - | - |
-| lr | Use logistic regression models |
-| unet | Use U-Net models |
-| eval | Evaluate model performance |
+If you find `GAISHI` useful, please cite:
 
-If you need further help, such as reporting a bug or suggesting a feature, please open an [issue](https://github.com/xin-huang/gaishi/issues).
+- Huang X, Hackl J, Kuhlwilm M. 2026. GAISHI: A Python package for detecting ghost introgression with machine learning. bioRxiv: 2026.01.31.703038. 
