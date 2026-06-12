@@ -51,18 +51,18 @@ def infer(
         raise ValueError(f"Error parsing YAML configuration file '{config}': {e}")
 
     global_config = GlobalConfig(**config_dict)
-    if global_config.preprocess.process_type == "feature_vector":
+    if global_config.preprocessing.process_type == "feature_vector":
         preprocess_feature_vectors(
-            **global_config.preprocess.model_dump(),
+            **global_config.preprocessing.model_dump(),
         )
 
-        data = f"{global_config.preprocess.output_dir}/{global_config.preprocess.output_prefix}.features"
-    elif global_config.preprocess.process_type == "genotype_matrix":
+        data = f"{global_config.preprocessing.output_dir}/{global_config.preprocessing.output_prefix}.features"
+    elif global_config.preprocessing.process_type == "genotype_matrix":
         preprocess_genotype_matrices(
-            **global_config.preprocess.model_dump(),
+            **global_config.preprocessing.model_dump(),
         )
 
-        data = f"{global_config.preprocess.output_dir}/{global_config.preprocess.output_prefix}.h5"
+        data = f"{global_config.preprocessing.output_dir}/{global_config.preprocessing.output_prefix}.h5"
     else:
         raise ValueError("")
 
