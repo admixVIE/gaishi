@@ -17,10 +17,15 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import inspect, joblib, os
+import inspect
+import os
+
+import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from gaishi.models import MlModel
+from gaishi.models.onnx_utils import predict_proba_with_onnx_classifier
+from gaishi.models.onnx_utils import save_sklearn_classifier_as_onnx
 from gaishi.registries.model_registry import MODEL_REGISTRY
 
 pd.options.mode.chained_assignment = None
@@ -53,7 +58,7 @@ class LrModel(MlModel):
         data : str
             Path to the training data file in tab-separated format.
         output : str
-            Path where the trained model will be saved.
+            Path where the trained ONNX model will be saved.
         **model_params
             Additional keyword arguments controlling the model and optional
             preprocessing. These are passed to the underlying logistic regression
@@ -72,7 +77,11 @@ class LrModel(MlModel):
         model = LogisticRegression(**clean_params)
         model.fit(data, labels.astype(int))
 
-        joblib.dump(model, output)
+        save_sklearn_classifier_as_onnx(
+            model=model,
+            output=output,
+            n_features=data.shape[1],
+        )
 
     @staticmethod
     def infer(
@@ -85,7 +94,7 @@ class LrModel(MlModel):
         Perform inference using a trained logistic regression model on new data.
 
         The feature table is read from a tab-separated file, the trained model is
-        loaded from disk, and predictions are written to the specified output.
+        loaded with ONNX Runtime, and predictions are written to the specified output.
         Any keyword arguments in `model_params` are accepted for API compatibility
         and ignored during inference.
 
@@ -94,7 +103,7 @@ class LrModel(MlModel):
         data : str
             Path to the inference data file in tab-separated format.
         model : str
-            Path to the saved trained model.
+            Path to the saved trained ONNX model.
         output : str
             Path where the inference output will be saved.
         **model_params
@@ -102,13 +111,17 @@ class LrModel(MlModel):
         """
         features = pd.read_csv(data, sep="\t")
         output_dir = os.path.dirname(output)
-        os.makedirs(output_dir, exist_ok=True)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
 
-        data = features.drop(columns=["Chromosome", "Start", "End", "Sample"]).values
+        data = features.drop(columns=["Chromosome", "Start", "End", "Sample"]).to_numpy(
+            dtype=np.float32
+        )
 
-        model = joblib.load(model)
-
-        predictions = model.predict_proba(data)
+        classes, predictions = predict_proba_with_onnx_classifier(
+            model=model,
+            data=data,
+        )
         prediction_df = features[["Chromosome", "Start", "End", "Sample"]]
 
         class_names = {
@@ -116,7 +129,6 @@ class LrModel(MlModel):
             "1": "Intro",
         }
 
-        classes = model.classes_
         for i in range(len(classes)):
             class_name = class_names[f"{classes[i]}"]
             prediction_df[f"{class_name}_Prob"] = predictions[:, i]
