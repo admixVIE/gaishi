@@ -18,8 +18,10 @@
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
 import os
-import yaml
+from pathlib import Path
 from typing import Optional
+
+import yaml
 from gaishi.configs import GlobalConfig
 from gaishi.registries.model_registry import MODEL_REGISTRY
 from gaishi.simulate import simulate_feature_vectors
@@ -60,7 +62,10 @@ def train(
 
     global_config = GlobalConfig(**config_dict)
     if global_config.simulation.sim_type == "feature_vector":
-        data = f"{global_config.simulation.output_dir}/{global_config.simulation.output_prefix}.tsv"
+        data = str(
+            Path(global_config.simulation.output_dir)
+            / f"{global_config.simulation.output_prefix}.tsv"
+        )
         if not os.path.exists(data):
             print("No training data found. Performing simulation ...")
             simulate_feature_vectors(
@@ -68,7 +73,10 @@ def train(
                 **global_config.simulation.model_dump(),
             )
     elif global_config.simulation.sim_type == "genotype_matrix":
-        data = f"{global_config.simulation.output_dir}/{global_config.simulation.output_prefix}.h5"
+        data = str(
+            Path(global_config.simulation.output_dir)
+            / f"{global_config.simulation.output_prefix}.h5"
+        )
         if not os.path.exists(data):
             print("No training data found. Performing simulation ...")
             simulate_genotype_matrices(

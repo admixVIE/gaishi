@@ -17,9 +17,13 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import h5py, os, pytest
+import os
+from pathlib import Path
+
+import h5py
 import numpy as np
 import pandas as pd
+import pytest
 import gaishi.stats
 from gaishi.preprocess import preprocess_feature_vectors
 from gaishi.preprocess import preprocess_genotype_matrices
@@ -94,7 +98,10 @@ def test_preprocess_feature_vectors(feature_vector_init_params):
 def test_preprocess_genotype_matrices(genotype_matrix_init_params):
     preprocess_genotype_matrices(**genotype_matrix_init_params)
 
-    output_file = f"{genotype_matrix_init_params['output_dir']}/{genotype_matrix_init_params['output_prefix']}.h5"
+    output_file = str(
+        Path(genotype_matrix_init_params["output_dir"])
+        / f"{genotype_matrix_init_params['output_prefix']}.h5"
+    )
 
     with h5py.File(output_file, "r") as f:
         # Meta

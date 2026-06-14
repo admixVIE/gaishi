@@ -17,6 +17,8 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
+from pathlib import Path
+
 import yaml
 from gaishi.configs import GlobalConfig
 from gaishi.registries.model_registry import MODEL_REGISTRY
@@ -56,13 +58,19 @@ def infer(
             **global_config.preprocessing.model_dump(),
         )
 
-        data = f"{global_config.preprocessing.output_dir}/{global_config.preprocessing.output_prefix}.features"
+        data = str(
+            Path(global_config.preprocessing.output_dir)
+            / f"{global_config.preprocessing.output_prefix}.features"
+        )
     elif global_config.preprocessing.process_type == "genotype_matrix":
         preprocess_genotype_matrices(
             **global_config.preprocessing.model_dump(),
         )
 
-        data = f"{global_config.preprocessing.output_dir}/{global_config.preprocessing.output_prefix}.h5"
+        data = str(
+            Path(global_config.preprocessing.output_dir)
+            / f"{global_config.preprocessing.output_prefix}.h5"
+        )
     else:
         raise ValueError("")
 
