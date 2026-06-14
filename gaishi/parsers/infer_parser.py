@@ -55,17 +55,17 @@ def add_infer_parser(subparsers: argparse.ArgumentParser) -> None:
         "--model",
         type=existed_file,
         required=True,
-        help="Path to the model file.",
+        help="Path to the trained model file.",
     )
     parser.add_argument(
         "--config",
         type=existed_file,
         required=True,
-        help="Path to the config file.",
+        help="Path to the `GAISHI` configuration YAML file.",
     )
     parser.add_argument(
         "--output",
         required=True,
-        help="Path to the output file.",
+        help="Path to the inference output file.",
     )
     parser.set_defaults(runner=_run_infer)

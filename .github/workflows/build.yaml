@@ -22,7 +22,7 @@ jobs:
         cache-downloads: false
         cache-environment: false
         environment-name: gaishi-dev
-        environment-file: dev-env.yaml
+        environment-file: env.yaml
         generate-run-shell: false
     - name: Test with pytest
       run: |
