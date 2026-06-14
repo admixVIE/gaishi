@@ -5,6 +5,10 @@ on: [push, pull_request]
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+      max-parallel: 5
     
     steps:
     - uses: actions/checkout@v3
