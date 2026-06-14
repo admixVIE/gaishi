@@ -17,11 +17,13 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
+from pathlib import Path
+from multiprocessing import Lock, Value
+
 import pytest
 import h5py
 import numpy as np
 import pandas as pd
-from multiprocessing import Lock, Value
 from gaishi.multiprocessing import mp_manager
 from gaishi.generators import RandomNumberGenerator
 from gaishi.simulators import GenotypeMatrixSimulator
@@ -125,7 +127,9 @@ def test_GenotypeMatrixSimulator_h5(init_params_h5):
         lock=Lock(),
     )
 
-    h5_path = f'{init_params_h5["output_dir"]}/{init_params_h5["output_prefix"]}.h5'
+    h5_path = str(
+        Path(init_params_h5["output_dir"]) / f'{init_params_h5["output_prefix"]}.h5'
+    )
 
     with h5py.File(h5_path, "r") as h5f:
         # Required datasets for inputs
