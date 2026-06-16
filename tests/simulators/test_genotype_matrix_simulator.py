@@ -24,6 +24,7 @@ import pytest
 import h5py
 import numpy as np
 import pandas as pd
+import gaishi.simulators.genotype_matrix_simulator as genotype_matrix_simulator
 from gaishi.multiprocessing import mp_manager
 from gaishi.generators import RandomNumberGenerator
 from gaishi.simulators import GenotypeMatrixSimulator
@@ -187,3 +188,89 @@ def test_GenotypeMatrixSimulator_h5(init_params_h5):
         assert ref0.size > 0 and tgt0.size > 0
         assert np.isfinite(ref0).all()
         assert np.isfinite(tgt0).all()
+
+
+def test_GenotypeMatrixSimulator_skips_too_few_labeler_polymorphisms(
+    init_params, tmp_path
+):
+    simulator = GenotypeMatrixSimulator(**init_params)
+    sim_dir = tmp_path / "sim"
+    sim_dir.mkdir()
+    vcf_file = sim_dir / "rep.vcf"
+    vcf_file.write_text("")
+
+    simulator.simulator.run = lambda rep=None, seed=None: [
+        {
+            "vcf_file": str(vcf_file),
+            "tgt_ind_file": str(sim_dir / "tgt.txt"),
+            "ref_ind_file": str(sim_dir / "ref.txt"),
+            "bed_file": str(sim_dir / "tracts.bed"),
+        }
+    ]
+
+    def raise_too_few_polymorphisms(*args, **kwargs):
+        raise ValueError(
+            f"Number of polymorphisms in {vcf_file} is less than "
+            f"{simulator.num_polymorphisms}."
+        )
+
+    simulator.labeler.run = raise_too_few_polymorphisms
+
+    assert (
+        simulator.run(
+            rep=0,
+            seed=1,
+            force_balanced=False,
+            nintro=Value("i", 0),
+            nnonintro=Value("i", 0),
+            only_intro=False,
+            only_non_intro=False,
+            lock=Lock(),
+        )
+        is None
+    )
+    assert not sim_dir.exists()
+
+
+def test_GenotypeMatrixSimulator_skips_too_few_generator_polymorphisms(
+    init_params, tmp_path, monkeypatch
+):
+    simulator = GenotypeMatrixSimulator(**init_params)
+    sim_dir = tmp_path / "sim"
+    sim_dir.mkdir()
+    vcf_file = sim_dir / "rep.vcf"
+    vcf_file.write_text("")
+
+    simulator.simulator.run = lambda rep=None, seed=None: [
+        {
+            "vcf_file": str(vcf_file),
+            "tgt_ind_file": str(sim_dir / "tgt.txt"),
+            "ref_ind_file": str(sim_dir / "ref.txt"),
+            "bed_file": str(sim_dir / "tracts.bed"),
+        }
+    ]
+    simulator.labeler.run = lambda *args, **kwargs: {}
+
+    def raise_no_windows(*args, **kwargs):
+        raise ValueError(
+            "No windows could be created with the given number of polymorphisms."
+        )
+
+    monkeypatch.setattr(
+        genotype_matrix_simulator, "PolymorphismDataGenerator", raise_no_windows
+    )
+
+    assert (
+        simulator.run(
+            rep=0,
+            seed=1,
+            force_balanced=False,
+            nintro=Value("i", 0),
+            nnonintro=Value("i", 0),
+            only_intro=False,
+            only_non_intro=False,
+            lock=Lock(),
+        )
+        is None
+    )
+    assert not sim_dir.exists()

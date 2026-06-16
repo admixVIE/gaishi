@@ -195,26 +195,38 @@ class GenotypeMatrixSimulator(GenericSimulator):
             The random seed for reproducibility. If not provided, a default value is used.
         """
 
+        if rep is None:
+            rep = 0
+
         file_paths = self.simulator.run(rep=rep, seed=seed)[0]
 
-        labels = self.labeler.run(
-            vcf_file=file_paths["vcf_file"],
-            tgt_ind_file=file_paths["tgt_ind_file"],
-            true_tract_file=file_paths["bed_file"],
-            rep=rep,
-        )
+        try:
+            labels = self.labeler.run(
+                vcf_file=file_paths["vcf_file"],
+                tgt_ind_file=file_paths["tgt_ind_file"],
+                true_tract_file=file_paths["bed_file"],
+                rep=rep,
+            )
 
-        polymorphism_data_generator = PolymorphismDataGenerator(
-            vcf_file=file_paths["vcf_file"],
-            ref_ind_file=file_paths["ref_ind_file"],
-            tgt_ind_file=file_paths["tgt_ind_file"],
-            chr_name="1",
-            random_polymorphisms=True,
-            num_polymorphisms=self.num_polymorphisms,
-            ploidy=self.ploidy,
-            is_phased=self.is_phased,
-            seed=seed,
-        )
+            polymorphism_data_generator = PolymorphismDataGenerator(
+                vcf_file=file_paths["vcf_file"],
+                ref_ind_file=file_paths["ref_ind_file"],
+                tgt_ind_file=file_paths["tgt_ind_file"],
+                chr_name="1",
+                random_polymorphisms=True,
+                num_polymorphisms=self.num_polymorphisms,
+                ploidy=self.ploidy,
+                is_phased=self.is_phased,
+                seed=seed,
+            )
+        except ValueError as e:
+            if self._is_insufficient_polymorphism_error(e):
+                if not self.keep_sim_data:
+                    shutil.rmtree(
+                        os.path.dirname(file_paths["vcf_file"]), ignore_errors=True
+                    )
+                return None
+            raise
 
         preprocessor = GenotypeMatrixPreprocessor(
             ref_ind_file=file_paths["ref_ind_file"],
@@ -256,6 +268,27 @@ class GenotypeMatrixSimulator(GenericSimulator):
 
         if not self.keep_sim_data:
             shutil.rmtree(os.path.dirname(file_paths["vcf_file"]), ignore_errors=True)
+
+    @staticmethod
+    def _is_insufficient_polymorphism_error(error: ValueError) -> bool:
+        """
+        Return whether an error indicates too few polymorphisms in a simulation.
+
+        Parameters
+        ----------
+        error : ValueError
+            Error raised while labeling or sampling simulated polymorphisms.
+
+        Returns
+        -------
+        bool
+            True if the error is caused by insufficient polymorphisms.
+        """
+        message = str(error)
+        return ("Number of polymorphisms" in message and "is less than" in message) or (
+            "No windows could be created with the given number of polymorphisms"
+            in message
+        )
 
     def _output_res(
         self,
