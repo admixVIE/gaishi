@@ -63,4 +63,4 @@ gaishi -h
 
 If you find `GAISHI` useful, please cite:
 
-- Huang X, Hackl J, Kuhlwilm M. 2026. GAISHI: A Python package for detecting ghost introgression with machine learning. bioRxiv: 2026.01.31.703038. 
+- Huang X, Hackl J, Pawar H, Kuhlwilm M. 2026. GAISHI: A Python package for detecting ghost introgression with machine learning. bioRxiv: 2026.01.31.703038. 
