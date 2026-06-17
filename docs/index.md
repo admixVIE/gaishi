@@ -48,9 +48,8 @@ Users can install `GAISHI` with [mamba](https://github.com/mamba-org/mamba):
 ```
 git clone https://github.com/xin-huang/gaishi
 cd gaishi
-mamba env create env.yaml
+mamba env create -f env.yaml
 conda activate gaishi
-pip install .
 ```
 
 To check the installation:
