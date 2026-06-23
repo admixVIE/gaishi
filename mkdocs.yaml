@@ -25,5 +25,6 @@ nav:
 - User Guide:
   - Overview: 'userguide/overview.md'
   - Configuration: 'userguide/configuration.md'
-  - train: 'userguide/train.md'
-  - infer: 'userguide/infer.md'
+  - Commands:
+    - train: 'userguide/train.md'
+    - infer: 'userguide/infer.md'
